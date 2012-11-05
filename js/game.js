@@ -69,7 +69,7 @@
             this.weapon = Crafty.e('Actor, Fourway, Weapon')
                 .animationLoader('goldensword');
                 
-            _.each([this.player, this.weapon], function(i) {
+            _.each([this.armor, this.weapon], function(i) {
                 i.attr({x: 20, y: 20})
                  .fourway(3);
             });

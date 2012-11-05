@@ -5,7 +5,7 @@
         init: function() {
             //uses the AnimationLoader component to load the sprites and data.
             //we are reusing the sprites and data from BrowserQuest: https://github.com/mozilla/BrowserQuest
-            this.requires('AnimationLoader, Delay');
+            this.requires('AnimationLoader, Delay, Collision');
             
             this.bind('AnimsLoaded', function() {
                 //once the animations are loaded, bind our movement handler to the NewDirection event
@@ -14,6 +14,18 @@
                 //set the initial animation to an idle one
                 this.animate('idle_down', 30, -1);
             });
+            
+            this.bind('AttackEnd', function() {
+                this.attacking = false;
+            });
+        },
+        attack: function() {
+            this.attacking = true;
+            this.triggerAnimation('atk');
+            var hit = this.hit('Enemy');
+            if(hit) {
+                this.trigger('HitEnemy', hit);
+            }
         },
         triggerAnimation: function(type) {
             var direction = this.direction || 'down';
@@ -36,6 +48,7 @@
                     //delay this by one game tick as the animation is ended straight after
                     //this callback returns.
                     this.delay(function() {
+                        this.trigger('AttackEnd');
                         this.triggerAnimation('idle');
                     }, 1);
                     
@@ -101,14 +114,17 @@
                 .animationLoader('goldenarmor');
             
             this.weapon = Crafty.e('Actor, Fourway, Weapon, Keyboard')
-                .animationLoader('goldensword');
+                .animationLoader('goldensword')
+                .bind('HitEnemy', function(hits) {
+                     console.log('hit enemy', hits);
+                 });
                 
             _.each([this.armor, this.weapon], function(i) {
                 i.attr({x: 20, y: 20})
                  .fourway(3)
                  .bind('KeyDown', function() {
                      if(this.isDown('SPACE')) {
-                         this.triggerAnimation('atk');
+                         this.attack();
                      }
                  });
             });
@@ -158,12 +174,12 @@
                         .animationLoader('boss');
     };
     
-    window.onload = function() {
+    $(document).ready(function() {
         var game = new Game();
         game.initCrafty();
         
         //play the main scene
         Crafty.scene('main');
-    };
+    });
     
 })();

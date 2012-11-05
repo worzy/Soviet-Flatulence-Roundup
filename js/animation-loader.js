@@ -23,7 +23,6 @@
                 self.attr({x: xPos + (data.offset_x * 2), y: yPos + (data.offset_y * 2)});
                 
                 _.each(data.animations, function(data, animName) {
-                    console.log(animName, data);
                     self.animate(animName, 0, data.row, data.length - 1);
                 });
                 

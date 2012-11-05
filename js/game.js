@@ -5,7 +5,7 @@
         init: function() {
             //uses the AnimationLoader component to load the sprites and data.
             //we are reusing the sprites and data from BrowserQuest: https://github.com/mozilla/BrowserQuest
-            this.requires('AnimationLoader');
+            this.requires('AnimationLoader, Delay');
             
             this.bind('AnimsLoaded', function() {
                 //once the animations are loaded, bind our movement handler to the NewDirection event
@@ -15,32 +15,66 @@
                 this.animate('idle_down', 30, -1);
             });
         },
+        triggerAnimation: function(type) {
+            var direction = this.direction || 'down';
+            
+            //left direction animations are just right animations that are flipped
+            if (this.direction === 'left') {
+                direction = 'right';
+            }
+            
+            var animationName = type + "_" + direction;
+            
+            if(type === 'walk') {
+                this.stop().animate(animationName, 10, -1);
+            } else if(type === 'idle') {
+                this.stop().animate(animationName, 30, -1);
+            } else if(type === 'atk') {
+                
+                //create a named function so we can unbind it using this reference later
+                var onEnd = function() {
+                    //delay this by one game tick as the animation is ended straight after
+                    //this callback returns.
+                    this.delay(function() {
+                        this.triggerAnimation('idle');
+                    }, 1);
+                    
+                    this.unbind('AnimationEnd', onEnd); //clean up after ourselves and unbind the event handler
+                };
+                
+                this.stop().animate(animationName, 10, 0);
+                this.bind('AnimationEnd', onEnd.bind(this)); //when the animation ends, trigger the 'onEnd' function above
+            }
+            
+            return this;
+        },
         onNewDirection: function(direction) {
             //Handler for the 'NewDirection' event fire by the Fourway component.
             //Here, we record the direction and if it changes, we swap the playing animation
             
             if (direction.x < 0) {
                 if (this.direction !== 'left') {
-                    this.stop().animate("walk_right", 10, -1).flip();
                     this.direction = 'left';
+                    this.triggerAnimation('walk').flip();
                 }
             }
             if (direction.x > 0) {
                 if (this.direction !== 'right') {
-                    this.stop().animate("walk_right", 10, -1).unflip();
                     this.direction = 'right';
+                    this.triggerAnimation('walk').unflip();
+                    
                 }
             }
             if (direction.y < 0) {
                 if (this.direction !== 'up') {
-                    this.stop().animate("walk_up", 10, -1);
                     this.direction = 'up';
+                    this.triggerAnimation('walk');
                 }
             }
             if (direction.y > 0) {
                 if (this.direction !== 'down') {
-                    this.stop().animate("walk_down", 10, -1);
                     this.direction = 'down';
+                    this.triggerAnimation('walk');
                 }
             }
             
@@ -49,11 +83,11 @@
             if(!direction.x && !direction.y) {
                 this.stop();
                 if (this.direction === 'left' || this.direction === 'right') {
-                    this.animate('idle_right', 30, -1);
+                    this.triggerAnimation('idle');
                 } else if (this.direction === 'up') {
-                    this.animate('idle_up', 30, -1);
+                    this.triggerAnimation('idle');
                 } else {
-                    this.animate('idle_down', 30, -1);
+                    this.triggerAnimation('idle');
                 }
             }
         }
@@ -63,16 +97,36 @@
     //we have to compose an armor and a weapon component together.
     Crafty.c('Player', {
         init: function() {
-            this.armor = Crafty.e('Actor, Fourway, Armor')
+            this.armor = Crafty.e('Actor, Fourway, Armor, Keyboard')
                 .animationLoader('goldenarmor');
             
-            this.weapon = Crafty.e('Actor, Fourway, Weapon')
+            this.weapon = Crafty.e('Actor, Fourway, Weapon, Keyboard')
                 .animationLoader('goldensword');
                 
             _.each([this.armor, this.weapon], function(i) {
                 i.attr({x: 20, y: 20})
-                 .fourway(3);
+                 .fourway(3)
+                 .bind('KeyDown', function() {
+                     if(this.isDown('SPACE')) {
+                         this.triggerAnimation('atk');
+                     }
+                 });
             });
+            
+            var self = this;
+            this.armor.bind('Moved', function() {
+                self.attr({x: self.armor.x, y: self.armor.y});
+            });
+            
+            this.requires('2D')
+                .attr({w: this.armor.attr('w'), h: this.armor.attr('h')})
+                .requires('Collision')
+                .collision(new Crafty.polygon(
+                    [10, 10],
+                    [10, 54],
+                    [54, 54],
+                    [54, 10]
+                ));
         }
     });
     

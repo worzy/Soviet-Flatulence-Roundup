@@ -139,9 +139,26 @@
             var hit = this.weapon.hit('Enemy');
             if(hit) {
                 console.log('hit enemy', hit);
+                this.trigger('HitEnemy', hit.length);
             }
         }
     });
+    
+    Crafty.c('Score', {
+        init: function() {
+            this.score = 0;
+            this.requires('2D, Canvas, Text');
+            this._textGen = function() {
+                return "Score: " + this.score;
+            };
+            this.attr({w: 100, h: 20, x: 900, y: 0})
+                .text(this._textGen);
+        },
+        increment: function() {
+            this.score = this.score + 1;
+            this.text(this._textGen);
+        }
+    })
     
     var Game = function() {
         Crafty.scene('main', this.mainScene);
@@ -173,6 +190,12 @@
                         
                         //this loads up the sprite data
                         .animationLoader('boss');
+        
+        var score = Crafty.e('Score');
+        
+        player.bind('HitEnemy', function() {
+            score.increment();
+        });
     };
     
     $(document).ready(function() {

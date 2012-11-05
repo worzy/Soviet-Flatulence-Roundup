@@ -47,6 +47,21 @@
         }
     });
     
+    Crafty.c('Player', {
+        init: function() {
+            this.player = Crafty.e('Actor, Fourway')
+                .animationLoader('goldenarmor');
+            
+            this.weapon = Crafty.e('Actor, Fourway, Weapon')
+                .animationLoader('goldensword');
+                
+            _.each([this.player, this.weapon], function(i) {
+                i.attr({x: 20, y: 20})
+                 .fourway(3);
+            });
+        }
+    });
+    
     var Game = function() {
         Crafty.scene('main', this.mainScene);
     };
@@ -55,14 +70,14 @@
         console.log("page ready, starting CraftyJS");
         Crafty.init(1024, 768);
         Crafty.canvas.init();
+        
+        Crafty.modules({ 'crafty-debug-bar': 'release' }, function () {
+            Crafty.debugBar.show();
+        });
     };
     
     Game.prototype.mainScene = function() {
-        var player = Crafty.e('Actor, Player, Fourway')
-                        //render at [20, 20] and have a width and height of 48px
-                        .attr({x: 20, y: 20})
-                        .animationLoader('goldenarmor')
-                        .fourway(3);
+        var player = Crafty.e('Player');
         
         var boss = Crafty.e('Actor, Boss')
                         //render at [20, 20] and have a width and height of 48px

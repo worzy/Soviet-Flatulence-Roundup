@@ -17,6 +17,10 @@
                 Crafty.sprite(data.width * 2, data.height * 2, spritesheet, spriteData);
                 
                 self.requires(name);
+                var xPos = self.attr('x');
+                var yPos = self.attr('y');
+                
+                self.attr({x: xPos + (data.offset_x * 2), y: yPos + (data.offset_y * 2)});
                 
                 _.each(data.animations, function(data, animName) {
                     console.log(animName, data);

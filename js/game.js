@@ -15,17 +15,9 @@
                 this.animate('idle_down', 30, -1);
             });
             
-            this.bind('AttackEnd', function() {
-                this.attacking = false;
-            });
         },
         attack: function() {
-            this.attacking = true;
             this.triggerAnimation('atk');
-            var hit = this.hit('Enemy');
-            if(hit) {
-                this.trigger('HitEnemy', hit);
-            }
         },
         triggerAnimation: function(type) {
             var direction = this.direction || 'down';
@@ -48,7 +40,6 @@
                     //delay this by one game tick as the animation is ended straight after
                     //this callback returns.
                     this.delay(function() {
-                        this.trigger('AttackEnd');
                         this.triggerAnimation('idle');
                     }, 1);
                     
@@ -107,35 +98,24 @@
     });
     
     //Player component - because of the way that the BrowserQuest assets are rendered,
-    //we have to compose an armor and a weapon component together.
+    //we have to compose armor and weapon entities together.
     Crafty.c('Player', {
         init: function() {
-            this.armor = Crafty.e('Actor, Fourway, Armor, Keyboard')
+            this.armor = Crafty.e('Actor, Armor')
                 .animationLoader('goldenarmor');
             
-            this.weapon = Crafty.e('Actor, Fourway, Weapon, Keyboard')
-                .animationLoader('goldensword')
-                .bind('HitEnemy', function(hits) {
-                     console.log('hit enemy', hits);
-                 });
-                
-            _.each([this.armor, this.weapon], function(i) {
-                i.attr({x: 20, y: 20})
-                 .fourway(3)
-                 .bind('KeyDown', function() {
-                     if(this.isDown('SPACE')) {
-                         this.attack();
-                     }
-                 });
-            });
+            this.weapon = Crafty.e('Actor, Weapon')
+                .animationLoader('goldensword');
             
-            var self = this;
-            this.armor.bind('Moved', function() {
-                self.attr({x: self.armor.x, y: self.armor.y});
-            });
-            
-            this.requires('2D')
-                .attr({w: this.armor.attr('w'), h: this.armor.attr('h')})
+            this.requires('2D, Fourway, Keyboard')
+                .fourway(3)
+                .bind('KeyDown', function() {
+                    if(this.isDown('SPACE')) {
+                        this.armor.attack();
+                        this.weapon.attack();
+                        this.attack();
+                    }
+                })
                 .requires('Collision')
                 .collision(new Crafty.polygon(
                     [10, 10],
@@ -143,6 +123,23 @@
                     [54, 54],
                     [54, 10]
                 ));
+            
+            //this will move the armor and weapon entities in lockstep with the player component
+            this.attach(this.armor, this.weapon);
+            
+            this.attr({x: 20, y: 20});
+            
+            //bind our movement handler to the NewDirection event
+            this.bind('NewDirection', function(direction) {
+                this.armor.onNewDirection(direction);
+                this.weapon.onNewDirection(direction);
+            });
+        },
+        attack: function() {
+            var hit = this.weapon.hit('Enemy');
+            if(hit) {
+                console.log('hit enemy', hit);
+            }
         }
     });
     
@@ -164,7 +161,11 @@
         //create a player...
         var player = Crafty.e('Player');
         
-        //and an enemy
+        //and an enemy or two
+        var enemy = Crafty.e('Actor, Enemy')
+            .attr({x: 350, y: 100})
+            .animationLoader('deathknight');
+        
         var boss = Crafty.e('Actor, Boss, Enemy') //here, Boss and Enemy are just tags - we can use them
                                                   //when checking for collisions
                         //render at [500, 500]

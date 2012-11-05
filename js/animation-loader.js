@@ -9,11 +9,12 @@
             var self = this;
             
             $.getJSON(jsonurl, function(data) {
-                var spriteSize = data.width * 2;
                 var spriteData = {};
                 spriteData[name] = [0, 0];
                 
-                Crafty.sprite(spriteSize, spritesheet, spriteData);
+                self.attr({w: data.width * 2, h: data.height * 2});
+                
+                Crafty.sprite(data.width * 2, data.height * 2, spritesheet, spriteData);
                 
                 self.requires(name);
                 
@@ -24,6 +25,8 @@
                 
                 self.trigger('AnimsLoaded');
             });
+            
+            return this;
         }
     });
 })();

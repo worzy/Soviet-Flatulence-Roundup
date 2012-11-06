@@ -9,7 +9,7 @@
             var self = this;
             
             $.getJSON(jsonurl, function(data) {
-                var scale = 2
+                var scale = 2;
                 var spriteData = {};
                 spriteData[name] = [0, 0];
                 
@@ -21,7 +21,11 @@
                 var xPos = self.attr('x');
                 var yPos = self.attr('y');
                 
-                self.attr({x: xPos + (data.offset_x * scale), y: yPos + (data.offset_y * scale)});
+                //magic +16 pixels to offset is magic
+                self.attr({
+                    x: xPos + ((data.offset_x + 16) * scale), 
+                    y: yPos + ((data.offset_y + 16) * scale)
+                });
                 
                 _.each(data.animations, function(data, animName) {
                     self.animate(animName, 0, data.row, data.length - 1);

@@ -12,6 +12,11 @@
         }
     });
     
+    //extend the 2D component, give it a centerPosition function
+    Crafty.components()['2D'].centerPosition = function() {
+        return new Crafty.math.Vector2D(this.x + (this.w / 2), this.y + (this.h / 2));
+    };
+    
     //base component for Actors - i.e. Players, Enemies, NPCs etc.
     Crafty.c('Actor', {
         init: function() {
@@ -33,15 +38,15 @@
                 this.animate('idle_down', 30, -1);
             });
         },
-        attack: function() {
-            this.triggerAnimation('atk');
-        },
         triggerAnimation: function(type) {
             var direction = this.direction || 'down';
             
             //left direction animations are just right animations that are flipped
             if (this.direction === 'left') {
                 direction = 'right';
+                this.flip();
+            } else if(this.direction === 'right') {
+                this.unflip();
             }
             
             var animationName = type + "_" + direction;
@@ -76,13 +81,13 @@
             if (direction.x < 0) {
                 if (this.direction !== 'left') {
                     this.direction = 'left';
-                    this.triggerAnimation('walk').flip();
+                    this.triggerAnimation('walk');
                 }
             }
             if (direction.x > 0) {
                 if (this.direction !== 'right') {
                     this.direction = 'right';
-                    this.triggerAnimation('walk').unflip();
+                    this.triggerAnimation('walk');
                     
                 }
             }
@@ -129,31 +134,25 @@
             //done by the armor and weapon. It reacts to the arrow keys (via Fourway component)
             //and to the space bar for attack.
             this.requires('2D, Fourway, Keyboard, ViewportBounded')
-                .attr({w: 64, h: 64})
+                .attr({w: 96, h: 96})
                 .fourway(3)
                 .bind('KeyDown', function() {
                     if(this.isDown('SPACE')) {
                         //space bar has been pressed
-                        this.armor.attack();
-                        this.weapon.attack();
+                        this.armor.triggerAnimation('atk');
+                        this.weapon.triggerAnimation('atk');
                         this.attack();
                     }
 
                 })
-                .requires('Collision')
-                //create a custom hit map here:
-                .collision(new Crafty.polygon(
-                    [-10, -10],
-                    [-10, 34],
-                    [34, 34],
-                    [34, -10]
-                ));
+                .requires('Collision');
+                
             
             //this will move the armor and weapon entities in lockstep with the player component
             this.attach(this.armor, this.weapon);
             
-            //start at position [64,64]
-            this.attr({x: 64, y: 64});
+            //start at position [20,20]
+            this.attr({x: 20, y: 20});
             
             //bind our movement handler to the NewDirection event
             this.bind('NewDirection', function(direction) {
@@ -184,8 +183,7 @@
         move: function() {
             var hit = this.hit('Player');
             if (hit) {
-                this.attack();
-                this.trigger('HitPlayer');
+                this.attack(hit);
             } else {
                 var xMovement = Crafty.math.randomInt(-100, 100);
                 var yMovement = Crafty.math.randomInt(-100, 100);
@@ -204,6 +202,29 @@
             }
             
             this.delay(this.move, 2000);
+        },
+        attack: function(hit) {
+            var player = hit[0].obj;
+            var attackPosition = player.centerPosition();
+            
+            var attackAngle = Crafty.math.radToDeg(this.centerPosition().angleTo(attackPosition));
+            
+            if (Crafty.math.withinRange(attackAngle, -135, -45)) {
+                //facing left
+                this.direction = 'up';
+            } else if(Crafty.math.withinRange(attackAngle, -45, 45)) {
+                //facing up
+                this.direction = 'right';
+            } else if(Crafty.math.withinRange(attackAngle, 45, 135)) {
+                //facing right
+                this.direction = 'down';
+            } else {
+                //facing down
+                this.direction = 'left';
+            }
+            
+            this.triggerAnimation('atk');
+            this.trigger('HitPlayer');
         },
         onMoveEnd: function() {
             this.onNewDirection({x: 0, y: 0});
@@ -283,6 +304,7 @@
         var enemy = Crafty.e('Actor, Enemy,')
             .attr({x: 350, y: 100})
             .animationLoader('deathknight');
+            
         
         var boss = Crafty.e('Actor, Boss, Enemy') //here, Boss and Enemy are just tags - we can use them
                                                   //when checking for collisions

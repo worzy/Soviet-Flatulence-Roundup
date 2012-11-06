@@ -31,7 +31,6 @@
                 });
                 
                 if (data.bounds !== undefined) {
-                    console.log("Loaded data: ", data)
                     var bounds = {x: data.bounds[0] * scale, y: data.bounds[1] * scale, w: data.bounds[2] * scale, h: data.bounds[3] * scale}
                     self._bounds = bounds
                 }
@@ -48,7 +47,6 @@
             } else {
                 var b = this._bounds
                 var poly = new Crafty.polygon([b.x,b.y], [b.x,b.y + b.h], [b.x + b.w, b.y + b.h], [b.x + b.w, b.y])
-                console.log("bounds as poly", b, poly)
                 return poly
             }
         }

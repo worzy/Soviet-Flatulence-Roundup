@@ -26,6 +26,7 @@
             
             //once the animations are loaded...
             this.bind('AnimsLoaded', function() {
+                // set collision bounds from loaded animation bounds
                 this.requires('Collision').collision(this.boundsAsPolygon());
 
                 //set the initial animation to an idle one

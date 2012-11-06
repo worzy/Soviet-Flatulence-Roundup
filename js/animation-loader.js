@@ -3,9 +3,6 @@
         init: function() {
             this.requires("2D, DOM, SpriteAnimation");
         },
-
-        _bounds: null,
-
         animationLoader: function(name) {
             var jsonurl = 'anims/' + name + '.json';
             var spritesheet = 'img/' + name + '.png';
@@ -31,8 +28,13 @@
                 });
                 
                 if (data.bounds !== undefined) {
-                    var bounds = {x: data.bounds[0] * scale, y: data.bounds[1] * scale, w: data.bounds[2] * scale, h: data.bounds[3] * scale}
-                    self._bounds = bounds
+                    var bounds = {
+                        x: data.bounds[0] * scale, 
+                        y: data.bounds[1] * scale, 
+                        w: data.bounds[2] * scale, 
+                        h: data.bounds[3] * scale
+                    };
+                    self._bounds = bounds;
                 }
 
                 self.trigger('AnimsLoaded');
@@ -40,14 +42,13 @@
             
             return this;
         },
-
         boundsAsPolygon: function() {
-            if (this._bounds === null) {
-                return undefined;
+            if (this._bounds) {
+                var b = this._bounds;
+                var poly = new Crafty.polygon([b.x,b.y], [b.x,b.y + b.h], [b.x + b.w, b.y + b.h], [b.x + b.w, b.y]);
+                return poly;
             } else {
-                var b = this._bounds
-                var poly = new Crafty.polygon([b.x,b.y], [b.x,b.y + b.h], [b.x + b.w, b.y + b.h], [b.x + b.w, b.y])
-                return poly
+                return undefined;
             }
         }
     });

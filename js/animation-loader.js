@@ -1,7 +1,7 @@
 (function() {
     Crafty.c('AnimationLoader', {
         init: function() {
-            this.requires("2D, Canvas, SpriteAnimation");
+            this.requires("2D, DOM, SpriteAnimation");
         },
 
         _bounds: null,

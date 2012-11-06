@@ -8,6 +8,8 @@
             this.requires('AnimationLoader, Delay, Collision');
             
             this.bind('AnimsLoaded', function() {
+                this.collision(this.boundsAsPolygon());
+
                 //once the animations are loaded, bind our movement handler to the NewDirection event
                 this.bind('NewDirection', this.onNewDirection);
                 
@@ -115,14 +117,14 @@
                         this.weapon.attack();
                         this.attack();
                     }
-                })
-                .requires('Collision')
-                .collision(new Crafty.polygon(
-                    [10, 10],
-                    [10, 54],
-                    [54, 54],
-                    [54, 10]
-                ));
+                });
+                // .requires('Collision')
+                // .collision(new Crafty.polygon(
+                //     [10, 10],
+                //     [10, 54],
+                //     [54, 54],
+                //     [54, 10]
+                // ));
             
             //this will move the armor and weapon entities in lockstep with the player component
             this.attach(this.armor, this.weapon);
@@ -179,7 +181,7 @@
         var player = Crafty.e('Player');
         
         //and an enemy or two
-        var enemy = Crafty.e('Actor, Enemy')
+        var enemy = Crafty.e('Actor, Enemy,')
             .attr({x: 350, y: 100})
             .animationLoader('deathknight');
         

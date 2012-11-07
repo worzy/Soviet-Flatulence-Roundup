@@ -148,7 +148,7 @@
                 if (comps && and) for (i = 0; i < l; i++) this.extend(components[comps[i]]);
 
                 this.length = elem; //length is the last index (already incremented)
-				
+
 				// if there's only one entity, return the actual entity
 				if (elem === 1) {
 					return entities[this[elem-1]];
@@ -1653,7 +1653,7 @@ function(Crafty, window, document) {
 /**@
 * #Crafty.map
 * @category 2D
-* Functions related with querying entities.
+* Functions related with querying entities. 
 * @see Crafty.HashMap
 */
 Crafty.map = new Crafty.HashMap();
@@ -1947,7 +1947,7 @@ Crafty.c("2D", {
 				}
 				this._children = [];
 			}
-			
+
 			if (this._parent) {
 				this._parent.detach(this);
 			}
@@ -2273,7 +2273,7 @@ Crafty.c("2D", {
 	* @sign public this .origin(String offset)
 	* @param offset - Combination of center, top, bottom, middle, left and right
 	* Set the origin point of an entity for it to rotate around.
-	*
+	* 
 	* @example
 	* ~~~
 	* this.origin("top left")
@@ -2281,7 +2281,7 @@ Crafty.c("2D", {
 	* this.origin("bottom right")
 	* this.origin("middle right")
 	* ~~~
-	*
+	* 
 	* @see .rotation
 	*/
 	origin: function (x, y) {
@@ -2314,9 +2314,9 @@ Crafty.c("2D", {
 	* @trigger Change - when the entity has flipped
 	* @sign public this .flip(String dir)
 	* @param dir - Flip direction
-	*
+	* 
 	* Flip entity on passed direction
-	*
+	* 
 	* @example
 	* ~~~
 	* this.flip("X")
@@ -2329,16 +2329,16 @@ Crafty.c("2D", {
                     this.trigger("Change");
                 }
 	},
-
+        
         /**@
 	* #.unflip
 	* @comp 2D
 	* @trigger Change - when the entity has unflipped
 	* @sign public this .unflip(String dir)
 	* @param dir - Unflip direction
-	*
+	* 
 	* Unflip entity on passed direction (if it's flipped)
-	*
+	* 
 	* @example
 	* ~~~
 	* this.unflip("X")
@@ -2431,12 +2431,12 @@ Crafty.c("Gravity", {
 	* @comp Gravity
 	* @sign public this .gravity([comp])
 	* @param comp - The name of a component that will stop this entity from falling
-	*
-	* Enable gravity for this entity no matter whether comp parameter is not specified,
+	* 
+	* Enable gravity for this entity no matter whether comp parameter is not specified, 
 	* If comp parameter is specified all entities with that component will stop this entity from falling.
 	* For a player entity in a platform game this would be a component that is added to all entities
 	* that the player should be able to walk on.
-	*
+	* 
 	* @example
 	* ~~~
 	* Crafty.e("2D, DOM, Color, Gravity")
@@ -2458,9 +2458,9 @@ Crafty.c("Gravity", {
 	* @comp Gravity
 	* @sign public this .gravityConst(g)
 	* @param g - gravitational constant
-	*
+	* 
 	* Set the gravitational constant to g. The default is .2. The greater g, the faster the object falls.
-	*
+	* 
 	* @example
 	* ~~~
 	* Crafty.e("2D, DOM, Color, Gravity")
@@ -2538,7 +2538,7 @@ Crafty.c("Gravity", {
 /**@
 * #Crafty.polygon
 * @category 2D
-*
+* 
 * Polygon object used for hitboxes and click maps. Must pass an Array for each point as an
 * argument where index 0 is the x position and index 1 is the y position.
 *
@@ -2570,9 +2570,9 @@ Crafty.polygon.prototype = {
 	* @sign public Boolean .containsPoint(Number x, Number y)
 	* @param x - X position of the point
 	* @param y - Y position of the point
-	*
+	* 
 	* Method is used to determine if a given point is contained by the polygon.
-	*
+	* 
 	* @example
 	* ~~~
 	* var poly = new Crafty.polygon([50,0],[100,100],[0,100]);
@@ -2598,9 +2598,9 @@ Crafty.polygon.prototype = {
 	* @sign public void .shift(Number x, Number y)
 	* @param x - Amount to shift the `x` axis
 	* @param y - Amount to shift the `y` axis
-	*
+	* 
 	* Shifts every single point in the polygon by the specified amount.
-	*
+	* 
 	* @example
 	* ~~~
 	* var poly = new Crafty.polygon([50,0],[100,100],[0,100]);
@@ -2672,9 +2672,9 @@ Crafty.circle.prototype = {
 	* @sign public Boolean .containsPoint(Number x, Number y)
 	* @param x - X position of the point
 	* @param y - Y position of the point
-	*
+	* 
 	* Method is used to determine if a given point is contained by the circle.
-	*
+	* 
 	* @example
 	* ~~~
 	* var circle = new Crafty.circle(0, 0, 10);
@@ -2697,9 +2697,9 @@ Crafty.circle.prototype = {
 	* @sign public void .shift(Number x, Number y)
 	* @param x - Amount to shift the `x` axis
 	* @param y - Amount to shift the `y` axis
-	*
+	* 
 	* Shifts the circle by the specified amount.
-	*
+	* 
 	* @example
 	* ~~~
 	* var poly = new Crafty.circle(0, 0, 10);
@@ -4648,8 +4648,8 @@ Crafty.extend({
         * simply add `Crafty.viewport.y` onto the entities `y` position.
         */
         _y: 0,
-		
-		/**@
+
+        /**@
          * #Crafty.viewport.bounds
          * @comp Crafty.viewport
          *
@@ -10372,11 +10372,13 @@ Crafty.c("Delay", {
 		this._delays = [];
 		this.bind("EnterFrame", function() {
 			var now = new Date().getTime();
-			for(var index in this._delays) {
+			for (var index = 0; index < this._delays.length; index++) {
 				var item = this._delays[index];
-				if(!item.triggered && item.start + item.delay + item.pause < now) {
-					item.triggered=true;
+				if(item.start + item.delay + item.pause < now) {
 					item.func.call(this);
+					// remove item from array
+					this._delays.splice(index,1);
+					index--;
 				}
 			}
 		});
@@ -10394,7 +10396,7 @@ Crafty.c("Delay", {
 			}
 		});
 	},
-    /**@
+	/**@
 	* #.delay
 	* @comp Crafty Time
 	* @sign public this.delay(Function callback, Number delay)
@@ -10413,7 +10415,7 @@ Crafty.c("Delay", {
 	* ~~~
 	* console.log("start");
 	* this.delay(function() {
-	     console.log("100ms later");
+		 console.log("100ms later");
 	* }, 100);
 	* ~~~
 	*/
@@ -10422,7 +10424,6 @@ Crafty.c("Delay", {
 			start : new Date().getTime(),
 			func : func,
 			delay : delay,
-			triggered : false,
 			pauseBuffer: 0,
 			pause: 0
 		});

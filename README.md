@@ -2,9 +2,9 @@
 
 This is a starter pack for RPG games that allows you to import animated sprites from the [BrowserQuest project](https://github.com/mozilla/BrowserQuest/).
 
-To run this project, open index.html in a web browser.
+To run this project you should execute the run-server.sh script and navigate to [http://localhost:8000](http://localhost:8000). This requires Python and bash. 
 
-Alternatively you can execute the run-server.sh script and navigate to [http://localhost:8000](http://localhost:8000)  (Requires Python and bash)
+If you are on windows, open up a Command Prompt and cd to the directory you unzipped/downloaded this project to and then run 'python -m SimpleHTTPServer'
 
 
 Open sourced as part of the Mozilla Festival 2012's session '[HTML5 Mash Up with Mind Candy](http://lanyrd.com/2012/mozilla-festival/szcbt/)'

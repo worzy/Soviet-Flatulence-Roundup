@@ -1,3 +1,11 @@
 # HTML5 Game Jam with CraftyJS
 
-To run this project, run `python -m SimpleHTTPServer` and navigate to [http://localhost:8000](http://localhost:8000)
+This is a starter pack for RPG games that allows you to import animated sprites from the [https://github.com/mozilla/BrowserQuest/](BrowserQuest project).
+
+To run this project, open index.html in a web browser.
+
+Alternatively you can execute the run-server.sh script and navigate to [http://localhost:8000](http://localhost:8000)  (Requires Python and bash)
+
+
+Open sourced as part of the Mozilla Festival 2012's session 'HTML5 Mash Up with Mind Candy'
+For the slides to that sessions see [http://www.rvl.io/markltbaker/mashupwithmindcandy]

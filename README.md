@@ -1,6 +1,6 @@
 # HTML5 Game Jam with CraftyJS
 
-This is a starter pack for RPG games that allows you to import animated sprites from the [BrowserQuest project](https://github.com/mozilla/BrowserQuest/).
+This is a starter pack for RPG games that allows you to import animated sprites from the [BrowserQuest project](https://github.com/mozilla/BrowserQuest/). You can play it [here](http://mindcandy.github.com/crafty-starter-game-rpg/).
 
 To run this project you should execute the run-server.sh script and navigate to [http://localhost:8000](http://localhost:8000). This requires Python and bash. 
 

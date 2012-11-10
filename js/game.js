@@ -124,45 +124,29 @@
     //This component also has the behaviour for when the player attacks.
     Crafty.c('Player', {
         init: function() {
-            this.armor = Crafty.e('Actor, Armor')
-                .animationLoader('goldenarmor');
-            
-            this.weapon = Crafty.e('Actor, Weapon')
-                .animationLoader('goldensword');
             
             //this component does not need Canvas or DOM components since all the rendering is
             //done by the armor and weapon. It reacts to the arrow keys (via Fourway component)
             //and to the space bar for attack.
-            this.requires('2D, Fourway, Keyboard, ViewportBounded')
-                .attr({w: 96, h: 96})
+            this.requires('2D, DOM, Fourway, Keyboard, ViewportBounded, Collision, agent')
                 .fourway(3)
-                .bind('KeyDown', function() {
-                    if(this.isDown('SPACE')) {
-                        //space bar has been pressed
-                        this.armor.triggerAnimation('atk');
-                        this.weapon.triggerAnimation('atk');
-                        this.attack();
-                    }
-
-                })
                 .requires('Collision');
                 
             
-            //this will move the armor and weapon entities in lockstep with the player component
-            this.attach(this.armor, this.weapon);
             
             //start at position [20,20]
             this.attr({x: 20, y: 20});
             
-            //bind our movement handler to the NewDirection event
-            this.bind('NewDirection', function(direction) {
-                this.armor.onNewDirection(direction);
-                this.weapon.onNewDirection(direction);
-            });
-            
             this.bind('Moved', function(oldPosition) {
                 this.checkOutOfBounds(oldPosition);
             });
+
+            this.onHit('Flatule', function(hit){
+                this.trigger('HitFlatule', hit.length);
+                _.forEach(hit, function(item){
+                    item.obj.destroy();
+                });
+            })
         },
         attack: function() {
             //check whether we are colliding with an Enemy component
@@ -173,15 +157,21 @@
             }
         }
     });
+
+    Crafty.c('Flatule', {
+        init: function(){
+            this.requires('2D, DOM, Color, flatule');
+        }
+    })
     
     Crafty.c('Enemy', {
         init: function() {
-            this.requires('2D, Delay, Tween, Actor');
+            this.requires('2D, Delay, Tween, soviet, Collision');
             this.bind('TweenEnd', this.onMoveEnd);
             this.delay(this.move, 2000);
         },
         move: function() {
-            var hit = this.hit('Player');
+            var hit = false;
             if (hit) {
                 this.attack(hit);
             } else {
@@ -196,9 +186,13 @@
                 };
 
                 if(this.within.call(newPos, 0, 0, Crafty.viewport.width, Crafty.viewport.height)) {
-                    this.onNewDirection({x: xMovement, y: yMovement});
+                    //this.onNewDirection({x: xMovement, y: yMovement});
                     this.tween({x: newPos.x, y: newPos.y}, 60);
                 }
+            }
+
+            if(Crafty.math.randomInt(0, 4) === 0){
+                this.fart();
             }
             
             this.delay(this.move, 2000);
@@ -226,8 +220,12 @@
             this.triggerAnimation('atk');
             this.trigger('HitPlayer');
         },
+        fart: function(){
+            console.log('fart at'+ this.x + ' ' + this.y);
+            Crafty.e('Flatule').attr({x: this.x, y: this.y});
+        },
         onMoveEnd: function() {
-            this.onNewDirection({x: 0, y: 0});
+            //this.onNewDirection({x: 0, y: 0});
         }
     });
     
@@ -287,36 +285,43 @@
         }
         
         Crafty.load([
-            'img/boss.png',
-            'img/deathknight.png',
-            'img/goldenarmor.png',
-            'img/goldensword.png'
+            'img/agent_front.png',
+            'img/bystander_front.png',
+            'img/flatule.png'
         ], 
         onLoaded, onProgress, onError);
         
     };
+
+    Crafty.sprite(48, 48, 'img/soviet_front.png', {
+        'soviet': [0,0]
+    });
+
+    Crafty.sprite(48, 48, 'img/agent_front.png', {
+        'agent': [0,0]
+    });
+
+    Crafty.sprite(48, 48, 'img/flatule.png', {
+        'flatule': [0,0]
+    });
+
+
     
     Game.prototype.mainScene = function() {
+        Crafty.background('url(img/background.png)');
         //create a player...
         var player = Crafty.e('Player');
-        
-        //and an enemy or two
-        var enemy = Crafty.e('Actor, Enemy,')
-            .attr({x: 350, y: 100})
-            .animationLoader('deathknight');
-            
-        
-        var boss = Crafty.e('Actor, Boss, Enemy') //here, Boss and Enemy are just tags - we can use them
-                                                  //when checking for collisions
-                        //render at [500, 500]
-                        .attr({x: 500, y: 500})
-                        
-                        //this loads up the sprite data
-                        .animationLoader('boss');
+
+        var enemies = [];
+
+        for(var i=0; i < 10; i++){
+            enemies.push(Crafty.e('Actor, Enemy,')
+                .attr({x: 350, y: 350}));
+        }
         
         var score = Crafty.e('Score');
         
-        player.bind('HitEnemy', function() {
+        player.bind('HitFlatule', function() {
             score.increment();
         });
         

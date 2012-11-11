@@ -128,12 +128,11 @@
             //this component does not need Canvas or DOM components since all the rendering is
             //done by the armor and weapon. It reacts to the arrow keys (via Fourway component)
             //and to the space bar for attack.
-            this.requires('2D, DOM, Fourway, Keyboard, ViewportBounded, Collision, agent')
+            this.requires('2D, SpriteAnimation, DOM, Fourway, Keyboard, ViewportBounded, Collision, agent')
                 .fourway(3)
-                .requires('Collision');
+                .animate("walk_up", 0, 1, 3)
+                .animate("walk_down", 0, 0, 3);
                 
-            
-            
             //start at position [20,20]
             this.attr({x: 20, y: 20});
             
@@ -141,12 +140,39 @@
                 this.checkOutOfBounds(oldPosition);
             });
 
+            this.bind("NewDirection",
+                function (direction) {
+                    if (direction.y < 0) {
+                        if (!this.isPlaying("walk_up"))
+                            this.stop().animate("walk_up", 10, -1);
+                    }
+                    if (direction.y > 0) {
+                        if (!this.isPlaying("walk_down"))
+                            this.stop().animate("walk_down", 10, -1);
+                    }
+                    if(!direction.x && !direction.y) {
+                        this.stop();
+                    }
+            });
+
             this.onHit('Flatule', function(hit){
                 this.trigger('HitFlatule', hit.length);
                 _.forEach(hit, function(item){
                     item.obj.destroy();
                 });
-            })
+            });
+
+            this.onHit('Enemy', function(hit){
+                this.trigger('HitEnemy', hit.length);
+                _.forEach(hit, function(item){
+                });
+            });
+
+            this.onHit('Enemy2', function(hit){
+                this.trigger('HitEnemy', hit.length);
+                _.forEach(hit, function(item){
+                });
+            });
         },
         attack: function() {
             //check whether we are colliding with an Enemy component
@@ -166,17 +192,50 @@
     
     Crafty.c('Enemy', {
         init: function() {
-            this.requires('2D, Delay, Tween, soviet, Collision');
+            this.requires('2D, Delay, Tween, soviet1, Collision')
+                .animate("walk_left", 0, 2, 0)
+                .animate("walk_right", 0, 3, 0)
+                .animate("walk_up", 0, 1, 3)
+                .animate("walk_down", 0, 0, 3);
             this.bind('TweenEnd', this.onMoveEnd);
             this.delay(this.move, 2000);
         },
         move: function() {
+
             var hit = false;
             if (hit) {
                 this.attack(hit);
             } else {
                 var xMovement = Crafty.math.randomInt(-100, 100);
                 var yMovement = Crafty.math.randomInt(-100, 100);
+
+                //if(Math.abs(yMovement) > Math.abs(xMovement))
+                //{
+                    if (yMovement < 0) {
+                        if (!this.isPlaying("walk_up"))
+                            this.stop().animate("walk_up", 10, -1);
+                    }
+                    if (yMovement > 0) {
+                        if (!this.isPlaying("walk_down"))
+                            this.stop().animate("walk_down", 10, -1);
+                    }
+                /*
+                }
+                 else
+                {
+                    if (xMovement < 0) {
+                        if (!this.isPlaying("walk_left"))
+                            this.stop().animate("walk_left", 10, -1);
+                    }
+                    if (xMovement > 0) {
+                        if (!this.isPlaying("walk_right"))
+                            this.stop().animate("walk_right", 10, -1);
+                    }
+                }*/
+
+                if(!xMovement && !yMovement) {
+                    this.stop();
+                }
 
                 var newPos = {
                     x: this.x + xMovement,
@@ -185,7 +244,7 @@
                     h: this.h
                 };
 
-                if(this.within.call(newPos, 0, 0, Crafty.viewport.width, Crafty.viewport.height)) {
+                if(this.within.call(newPos, 20, 200, Crafty.viewport.width - 20, Crafty.viewport.height - 150)) {
                     //this.onNewDirection({x: xMovement, y: yMovement});
                     this.tween({x: newPos.x, y: newPos.y}, 60);
                 }
@@ -223,6 +282,98 @@
         fart: function(){
             console.log('fart at'+ this.x + ' ' + this.y);
             Crafty.e('Flatule').attr({x: this.x, y: this.y});
+        },
+        onMoveEnd: function() {
+            //this.onNewDirection({x: 0, y: 0});
+            this.stop();
+        }
+    });
+
+    Crafty.c('Enemy2', {
+        init: function() {
+            this.requires('2D, Delay, Tween, bystander, Collision')
+                .animate("walk_left", 0, 2, 0)
+                .animate("walk_right", 0, 3, 0)
+                .animate("walk_up", 0, 1, 0)
+                .animate("walk_down", 0, 0, 0);
+            this.bind('TweenEnd', this.onMoveEnd);
+            this.delay(this.move, 2000);
+        },
+        move: function() {
+
+            var hit = false;
+            if (hit) {
+                this.attack(hit);
+            } else {
+                var xMovement = Crafty.math.randomInt(-100, 100);
+                var yMovement = Crafty.math.randomInt(-100, 100);
+
+                /*
+                if(Math.abs(yMovement) > Math.abs(xMovement))
+                {
+                    if (yMovement < 0) {
+                        if (!this.isPlaying("walk_up"))
+                            this.stop().animate("walk_up", 10, -1);
+                    }
+                    if (yMovement > 0) {
+                        if (!this.isPlaying("walk_down"))
+                            this.stop().animate("walk_down", 10, -1);
+                    }
+                }
+                else
+                {
+                    if (xMovement < 0) {
+                        if (!this.isPlaying("walk_left"))
+                            this.stop().animate("walk_left", 10, -1);
+                    }
+                    if (xMovement > 0) {
+                        if (!this.isPlaying("walk_right"))
+                            this.stop().animate("walk_right", 10, -1);
+                    }
+                }
+
+                if(!xMovement && !xMovement) {
+                    this.stop();
+                }
+                */
+
+                var newPos = {
+                    x: this.x + xMovement,
+                    y: this.y + yMovement,
+                    w: this.w,
+                    h: this.h
+                };
+
+                if(this.within.call(newPos, 20, 200, Crafty.viewport.width - 20, Crafty.viewport.height - 150)) {
+                    //this.onNewDirection({x: xMovement, y: yMovement});
+                    this.tween({x: newPos.x, y: newPos.y}, 60);
+                }
+            }
+            
+            this.delay(this.move, 2000);
+        },
+        attack: function(hit) {
+            var player = hit[0].obj;
+            var attackPosition = player.centerPosition();
+            
+            var attackAngle = Crafty.math.radToDeg(this.centerPosition().angleTo(attackPosition));
+            
+            if (Crafty.math.withinRange(attackAngle, -135, -45)) {
+                //facing left
+                this.direction = 'up';
+            } else if(Crafty.math.withinRange(attackAngle, -45, 45)) {
+                //facing up
+                this.direction = 'right';
+            } else if(Crafty.math.withinRange(attackAngle, 45, 135)) {
+                //facing right
+                this.direction = 'down';
+            } else {
+                //facing down
+                this.direction = 'left';
+            }
+            
+            this.triggerAnimation('atk');
+            this.trigger('HitPlayer');
         },
         onMoveEnd: function() {
             //this.onNewDirection({x: 0, y: 0});
@@ -293,16 +444,20 @@
         
     };
 
-    Crafty.sprite(48, 48, 'img/soviet_front.png', {
-        'soviet': [0,0]
+    Crafty.sprite(50, 50, 'img/soviet_sprite.png', {
+        'soviet1'   : [0,0]
     });
 
-    Crafty.sprite(48, 48, 'img/agent_front.png', {
+    Crafty.sprite(50, 50, 'img/agent_sprite.png', {
         'agent': [0,0]
     });
 
     Crafty.sprite(48, 48, 'img/flatule.png', {
         'flatule': [0,0]
+    });
+
+    Crafty.sprite(48, 48, 'img/bystander.png', {
+        'bystander': [0,0]
     });
 
 
@@ -318,14 +473,19 @@
             enemies.push(Crafty.e('Actor, Enemy,')
                 .attr({x: 350, y: 350}));
         }
+
+        for(var i=0; i < 5; i++){
+            enemies.push(Crafty.e('Actor, Enemy2,')
+                .attr({x: 350, y: 350}));
+        }
         
         var score = Crafty.e('Score');
         
         player.bind('HitFlatule', function() {
             score.increment();
         });
-        
-        Crafty('Enemy').bind('HitPlayer', function() {
+
+        player.bind('HitEnemy', function() {
             score.decrement();
         });
     };
